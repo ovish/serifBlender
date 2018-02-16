@@ -5,60 +5,42 @@ import re
 import sys
 import os
 import codecs
+from decimal import Decimal
 
-os.chdir('/fliles/directory')
+os.chdir('/poth/to/files/directory')
 
 
 with open('timeRaw.srt', 'r') as f:
     data = f.read()
 
-
 # 秒数だけ抜き出すを正規表現で\d{2}\:\d{2}\,\d{2}
-pattern = r'\d{2}\:\d{2}\,\d{2}'
-matchList = re.findall(pattern, data)
+# リストの中にリストが入る[['n','o','p',,,{6}],,,{行数}]
+secList = [
+    re.findall(r'[0-9]', obj)
+    for obj in re.findall(r'\d{2}\:\d{2}\,\d{2}', data)
+    ]
 
+# 1秒単位に整える元は 00:58,89
+minSecList = [int(Lst[1]) * 60
+    for Lst in secList]  # 動画３分までだから[0]取ってこなくていい
+secOnlyList = [Decimal(''.join(str(Lst[i]) for i in range(2, 6))) / 100
+    for Lst in secList]  # 2=<i<6
 
-# 1/100秒単位に整える元は 00:58,89
-timeList = []
-for time in matchList:
-    timeS = str(time)
-    pattern = r'[0-9]'
-    secList = re.findall(pattern, timeS)
-
-    minSec = int(secList[1]) * 60 * 100
-    secOnly = ''
-    for i in range(2, 6):   # 2=<i<6
-        secOnly += str(secList[i])
-
-    secSum = minSec + int(secOnly)
-    timeList.append(secSum)
-
+timeList = [int(minSec) + Decimal(secOnly)
+    for (minSec, secOnly) in zip(minSecList, secOnlyList)]
 
 # シーンあたりの秒数を求めるために引き算
-diffList = []
-for index, time in enumerate(timeList):
-    if index % 2 != 0:
-        indexMinus = index - 1
-        timeLIndex = timeList[index]
-        timeLIndexMinus = timeList[indexMinus]
-        diff = int(timeLIndex) - int(timeLIndexMinus)
-        diffList.append(diff)
+diffList = [Decimal(time) - Decimal(timeList[index - 1])
+    for index, time in enumerate(timeList)
+    if index % 2  is not 0
+    ]
 
-
-# 6かけてピリオド入れる
-diffList6 = list(map(lambda x:x*6/float(100), diffList))
+# 6かける
+wordPerTime = 6
+diffListWord = [diffTime * wordPerTime
+    for diffTime in diffList]
 
 # ファイル書き込み
-with open('wordPerTime.txt', 'w') as f:
-        f.write('\n'.join(diffList6))
-
-'''
-# ぶっこむ
-with open('セリフ4fix.txt', 'r') as f:
-    serif4List = f.read().split('\n')
-dstList = []
-for serifLine, diffLine in zip(serif4List, diffList6):
-    dst = serifLine.replace('|0|', '|' + str(diffLine) + '|')
-    dstList.append(dst)
-print(dstList)
-'''
+with open('Time.txt', 'w') as f:
+    f.write('\n'.join(map(str, diffListWord)))
+#fin
