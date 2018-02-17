@@ -6,29 +6,26 @@ import sys
 import os
 import codecs
 
-os.chdir('/files/directory')
+os.chdir('/path/to/files/directory')
 
 # JpnとEngのリスト作成
+# 1行目は、タイトルなどの、セリフ内容と関係のないものであること
 with open('TriJpnFixNR.md', 'r') as f:
-    dataJpn = f.read()
-listJpn = dataJpn.split('\n')
-
+    listJpn = f.read().split('\n')
 with open('TriEngWorkSasJ.md', 'r') as f:
-    dataEng = f.read()
-listEng = dataEng.split('\n')
+    listEng = f.read().split('\n')
 
 with open('wordPerTime.txt', 'r') as f:
     listTime = f.read().split('\n')
-listTime.insert(0, 'padding') #0行合わせ
+    listTime.insert(0, 'padding') #0行合わせ
 
 # {{セリフ3|番号|キャラ名（日本語）|キャラ名（英語）|セリフ（日）|セリフ（英）}}
+# リスト作る
+verseList = [
+    '{{セリフ4' + '|' + str(i) + '.' + '|nameJ|nameE|' +  lineJpni + '|' + lineEngi + '|' + str(lineTime) + '|' + '}}'
+    for i, (lineJpni, lineEngi, lineTime) in enumerate(zip(listJpn, listEng, listTime))
+    ]
 
-# 書き込むファイル開く、なければ作られる
-f = open('セリフ4.txt', 'w')
-# 整形しつつ書き込む
-for i, (lineJpni, lineEngi, lineTime) in enumerate(zip(listJpn, listEng, listTime)):
-    iStr = str(i)
-    verse = '{{セリフ4' + '|' + iStr + '.' + '|nameJ|nameE|' +  lineJpni + '|' + lineEngi + '|' + str(lineTime) + '|' + '}}' + '\n'
-    f.write(verse)
-f.close()
+with open('セリフ4.txt', 'w') as f:
+        f.write('\n'.join(verseList))
 # おわり
