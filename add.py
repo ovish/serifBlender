@@ -10,7 +10,7 @@ import codecs
 # JpnとEngのリスト作成
 with open('final.srt', 'r') as f:
     listFinal = f.read().split('\n')
-with open('serif4.md', 'r') as f:
+with open('serif4srt.md', 'r') as f:
     listSerif = f.read().split('\n')
 
 
@@ -20,15 +20,12 @@ numlist = [str(line) for i, line in enumerate(listFinal) if i % 4 is 0]
 timelist = [str(line) for i, line in enumerate(listFinal) if i % 4 is 1]
 emptylist = [str(line) for i, line in enumerate(listFinal) if i % 4 is 3]
 
-LastList = []
-
-for i, line in enumerate(numlist):
-        LastList.append(numlist[i])
-        LastList.append(timelist[i])
-        LastList.append(listSerif[i])
-        LastList.append(emptylist[i])
-
-
+LastList = [
+    numlist[i] +'\n'+
+    timelist[i] +'\n'+
+    listSerif[i] +'\n'+
+    emptylist[i]
+    for i, line in enumerate(numlist)]
 
 # 書き込むファイル開く、なければ作られる
 with open('wannasleep.srt', 'w') as f:
