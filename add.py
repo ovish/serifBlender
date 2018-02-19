@@ -1,5 +1,10 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
+'''
+srtファイルの日本語訳の部分を置き換えます
+翻訳部分は単位時間あたり1行に直してください
+完成したあと手作業で文章の改行はいれてください
+'''
 
 import re
 import sys
